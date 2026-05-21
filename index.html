@@ -1,1 +1,1153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Directora / Panel de Control</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0e0e;
+  --surface: #161616;
+  --surface2: #1e1e1e;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0ede8;
+  --muted: #888;
+  --muted2: #555;
+  --accent: #c8a96e;
+  --accent2: #8fba74;
+  --red: #e05555;
+  --amber: #d4904a;
+  --blue: #5b8fd4;
+  --green: #8fba74;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.mono { font-family: 'DM Mono', monospace; }
+.serif { font-family: 'DM Serif Display', serif; }
 
+/* LAYOUT */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 10;
+  overflow-y: auto;
+}
+.main { margin-left: 220px; flex: 1; padding: 2rem 2.5rem; max-width: 1100px; }
+.logo {
+  padding: 0 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+.logo-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; color: var(--accent); letter-spacing: 0.01em; }
+.logo-sub { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(200,169,110,0.06); }
+.nav-section { padding: 1.25rem 1.25rem 0.4rem; font-size: 0.65rem; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.1em; }
+.nav-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-red { background: var(--red); }
+.dot-amber { background: var(--amber); }
+.dot-green { background: var(--green); }
+.dot-blue { background: var(--blue); }
+.dot-gray { background: var(--muted2); }
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HEADER */
+.page-header { margin-bottom: 2rem; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--text); line-height: 1.1; }
+.page-sub { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+.date-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--accent);
+  border: 1px solid rgba(200,169,110,0.3);
+  padding: 3px 10px;
+  border-radius: 99px;
+  margin-bottom: 0.75rem;
+}
+
+/* METRICS STRIP */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.metric-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+.metric-value { font-family: 'DM Serif Display', serif; font-size: 1.7rem; color: var(--text); line-height: 1; }
+.metric-value.red { color: var(--red); }
+.metric-value.amber { color: var(--amber); }
+.metric-value.green { color: var(--green); }
+.metric-sub { font-size: 0.7rem; color: var(--muted); margin-top: 5px; }
+
+/* SECTION */
+.section-label {
+  font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted2); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* DECISIONS */
+.decisions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 2rem; }
+.decision-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex; align-items: flex-start; gap: 14px;
+  position: relative;
+  transition: border-color 0.15s;
+}
+.decision-card:hover { border-color: var(--border2); }
+.decision-card.urgent { border-left: 3px solid var(--red); }
+.decision-card.warn { border-left: 3px solid var(--amber); }
+.decision-card.info { border-left: 3px solid var(--blue); }
+.decision-icon { font-size: 1.1rem; padding-top: 1px; }
+.decision-body { flex: 1; }
+.decision-title { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.decision-meta { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+.decision-proj { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--accent); background: rgba(200,169,110,0.1); padding: 2px 7px; border-radius: 4px; }
+.done-btn {
+  font-size: 0.7rem; border: 1px solid var(--border2); background: transparent;
+  color: var(--muted); padding: 4px 10px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.done-btn:hover { background: rgba(143,186,116,0.1); color: var(--green); border-color: var(--green); }
+
+/* PROJECTS GRID */
+.projects-grid { display: flex; flex-direction: column; gap: 10px; }
+.proj-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.proj-card:hover { border-color: var(--border2); }
+.proj-header {
+  padding: 1.1rem 1.4rem;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+}
+.proj-color { width: 4px; height: 44px; border-radius: 2px; flex-shrink: 0; }
+.proj-color.red { background: var(--red); }
+.proj-color.amber { background: var(--amber); }
+.proj-color.green { background: var(--green); }
+.proj-color.blue { background: var(--blue); }
+.proj-color.gray { background: var(--muted2); }
+.proj-info { flex: 1; }
+.proj-name { font-size: 0.95rem; font-weight: 500; color: var(--text); }
+.proj-location { font-size: 0.72rem; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.proj-tags { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tag {
+  font-size: 0.65rem; padding: 3px 8px; border-radius: 99px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.tag-red { background: rgba(224,85,85,0.12); color: #e07878; border: 1px solid rgba(224,85,85,0.2); }
+.tag-amber { background: rgba(212,144,74,0.12); color: #d4a06a; border: 1px solid rgba(212,144,74,0.2); }
+.tag-green { background: rgba(143,186,116,0.12); color: #a0c888; border: 1px solid rgba(143,186,116,0.2); }
+.tag-blue { background: rgba(91,143,212,0.12); color: #7aaee0; border: 1px solid rgba(91,143,212,0.2); }
+.tag-gray { background: rgba(136,136,136,0.1); color: var(--muted); border: 1px solid var(--border2); }
+.proj-meta { text-align: right; }
+.proj-pct { font-family: 'DM Serif Display', serif; font-size: 1.3rem; }
+.proj-pct-label { font-size: 0.65rem; color: var(--muted); }
+.proj-chevron { color: var(--muted); font-size: 0.9rem; transition: transform 0.2s; margin-left: 8px; }
+.proj-chevron.open { transform: rotate(180deg); }
+
+.proj-body { display: none; border-top: 1px solid var(--border); padding: 1.25rem 1.4rem; }
+.proj-body.open { display: block; }
+.proj-sections { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+.proj-section-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted2); margin-bottom: 8px; }
+.proj-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.proj-list li { font-size: 0.8rem; color: var(--text); padding-left: 12px; position: relative; }
+.proj-list li::before { content: '–'; position: absolute; left: 0; color: var(--muted2); }
+.proj-list li.mine { color: #e0a878; }
+.proj-list li.mine::before { content: '▸'; color: var(--amber); }
+.proj-list li.blocker { color: #e07878; }
+.proj-list li.blocker::before { content: '!'; color: var(--red); font-weight: 700; }
+
+.proj-actions { display: flex; gap: 8px; margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.proj-action {
+  font-size: 0.73rem; border: 1px solid var(--border2); background: transparent;
+  color: var(--muted); padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  transition: all 0.15s;
+}
+.proj-action:hover { background: var(--surface2); color: var(--text); }
+.proj-notes { margin-top: 1rem; }
+.proj-notes textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: 'Geist', sans-serif;
+  font-size: 0.78rem; padding: 10px 12px; resize: vertical; min-height: 60px;
+  outline: none;
+}
+.proj-notes textarea:focus { border-color: var(--border2); }
+.proj-notes textarea::placeholder { color: var(--muted2); }
+.save-note-btn {
+  margin-top: 6px; font-size: 0.72rem; border: 1px solid var(--border2); background: transparent;
+  color: var(--muted); padding: 4px 12px; border-radius: 6px; cursor: pointer;
+}
+.save-note-btn:hover { color: var(--green); border-color: var(--green); }
+
+/* CHECKIN MODAL */
+.overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+  z-index: 100; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  width: 540px; max-width: 95vw;
+  padding: 2rem;
+}
+.modal-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--text); }
+.modal-title span { color: var(--accent); font-style: italic; }
+.modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; }
+.modal-project-label {
+  font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--accent);
+  background: rgba(200,169,110,0.1); padding: 4px 10px; border-radius: 99px;
+  display: inline-block; margin-bottom: 1rem;
+}
+.modal-q { font-size: 1rem; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+.modal-q-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 1rem; }
+.modal-input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-family: 'Geist', sans-serif;
+  font-size: 0.85rem; padding: 12px 14px; resize: vertical; min-height: 90px; outline: none;
+}
+.modal-input:focus { border-color: var(--border2); }
+.modal-input::placeholder { color: var(--muted2); }
+.modal-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 1.25rem; }
+.modal-progress-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; margin-right: 1rem; overflow: hidden; }
+.modal-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+.modal-btns { display: flex; gap: 8px; }
+.btn-skip {
+  background: transparent; border: 1px solid var(--border2); color: var(--muted);
+  padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; cursor: pointer;
+}
+.btn-next {
+  background: var(--accent); border: none; color: #1a1206;
+  padding: 7px 18px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+}
+.btn-next:hover { opacity: 0.9; }
+
+/* STAFF PAGE */
+.staff-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.staff-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.1rem;
+}
+.staff-initial {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(200,169,110,0.12); border: 1px solid rgba(200,169,110,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--accent);
+  margin-bottom: 10px;
+}
+.staff-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+.staff-role { font-size: 0.73rem; color: var(--muted); margin-top: 2px; margin-bottom: 10px; }
+.staff-projects { display: flex; flex-wrap: wrap; gap: 4px; }
+.staff-proj-tag { font-size: 0.6rem; padding: 2px 7px; border-radius: 99px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+.staff-note { font-size: 0.72rem; color: #d4a06a; margin-top: 8px; }
+
+/* PIPELINE PAGE */
+.pipeline-list { display: flex; flex-direction: column; gap: 10px; }
+.pipeline-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.25rem;
+  display: flex; align-items: center; gap: 14px;
+}
+.pipeline-status { writing-mode: vertical-lr; transform: rotate(180deg); font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted2); }
+.pipeline-info { flex: 1; }
+.pipeline-name { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+.pipeline-detail { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+.pipeline-action { font-size: 0.75rem; color: var(--amber); }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 12px 18px;
+  font-size: 0.8rem; color: var(--text);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s; z-index: 200;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* CHECKIN DONE SCREEN */
+.checkin-done { text-align: center; padding: 1rem 0; }
+.checkin-done-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.checkin-done-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--accent); margin-bottom: 0.5rem; }
+.checkin-done-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.7; }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 1.25rem; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .proj-sections { grid-template-columns: 1fr; }
+  .staff-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-title">Directora</div>
+      <div class="logo-sub">Panel de Control</div>
+    </div>
+    <div class="nav-section">Vista General</div>
+    <div class="nav-item active" onclick="showPage('home')">
+      <span>◈</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="openCheckin()">
+      <span>◉</span> Check-in diario
+    </div>
+    <div class="nav-section">Proyectos Activos</div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-red"></div> El Encino
+    </div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-amber"></div> Quercus
+    </div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-green"></div> Gaviotas Mochis
+    </div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-blue"></div> Tech Park AR
+    </div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-red"></div> Gaviotas Hermosillo
+    </div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-amber"></div> El Roble
+    </div>
+    <div class="nav-item" onclick="showPage('projects')">
+      <div class="nav-dot dot-blue"></div> INFONAVIT
+    </div>
+    <div class="nav-section">Más</div>
+    <div class="nav-item" onclick="showPage('pipeline')">
+      <span>◇</span> Pipeline / Sin vender
+    </div>
+    <div class="nav-item" onclick="showPage('staff')">
+      <span>◎</span> Equipo
+    </div>
+    <div style="margin-top:auto; padding: 1rem 1.25rem; border-top: 1px solid var(--border); display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted2);margin-bottom:2px;">Respaldo de datos</div>
+      <button onclick="exportData()" style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted);font-size:0.75rem;padding:7px 10px;border-radius:8px;cursor:pointer;text-align:left;font-family:'Geist',sans-serif;transition:all 0.15s;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">
+        ↓ Exportar mis notas
+      </button>
+      <label style="width:100%;background:transparent;border:1px solid var(--border2);color:var(--muted);font-size:0.75rem;padding:7px 10px;border-radius:8px;cursor:pointer;text-align:left;display:block;box-sizing:border-box;transition:all 0.15s;" onmouseover="this.style.color='var(--green)';this.style.borderColor='var(--green)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">
+        ↑ Importar respaldo
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+      </label>
+      <div style="font-size:0.62rem;color:var(--muted2);line-height:1.5;">Exporta tu archivo después de cada sesión y guárdalo en tu computadora.</div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HOME PAGE -->
+    <div class="page active" id="page-home">
+      <div class="page-header">
+        <div class="date-badge" id="today-badge"></div>
+        <div class="page-title">Buenos días, <em style="font-style:italic;color:var(--accent)">Directora.</em></div>
+        <div class="page-sub">Esto es lo que necesita tu atención hoy — antes de revisar cualquier email o admin.</div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">Proyectos activos</div>
+          <div class="metric-value">7</div>
+          <div class="metric-sub">3 requieren tu decisión</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Alertas críticas</div>
+          <div class="metric-value red">4</div>
+          <div class="metric-sub">legales, retrasos, cobranza</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Check-in hoy</div>
+          <div class="metric-value amber" id="checkin-count">0/7</div>
+          <div class="metric-sub">proyectos revisados</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Pipeline sin activar</div>
+          <div class="metric-value">4</div>
+          <div class="metric-sub">Harbor, Cubos, Bernal, Nayarit</div>
+        </div>
+      </div>
+
+      <div class="section-label">Decisiones que solo tú puedes tomar</div>
+      <div class="decisions" id="decisions-list"></div>
+
+      <div class="section-label">Estado rápido de proyectos</div>
+      <div class="projects-grid" id="home-projects"></div>
+    </div>
+
+    <!-- PROJECTS PAGE -->
+    <div class="page" id="page-projects">
+      <div class="page-header">
+        <div class="page-title">Todos los proyectos</div>
+        <div class="page-sub">Haz clic en un proyecto para ver responsabilidades, bloqueos y notas.</div>
+      </div>
+      <div class="projects-grid" id="all-projects"></div>
+    </div>
+
+    <!-- PIPELINE PAGE -->
+    <div class="page" id="page-pipeline">
+      <div class="page-header">
+        <div class="page-title">Pipeline / Sin vender</div>
+        <div class="page-sub">Proyectos existentes que aún no se han activado. Aquí está el próximo dinero.</div>
+      </div>
+      <div class="pipeline-list">
+        <div class="pipeline-card">
+          <div class="pipeline-status">Parque Industrial</div>
+          <div class="pipeline-info">
+            <div class="pipeline-name">Harbor — Parque Industrial</div>
+            <div class="pipeline-detail">Tierra disponible · Sin preventa · Querétaro</div>
+            <div class="pipeline-action">¿Qué falta para activar la venta?</div>
+          </div>
+          <span class="tag tag-gray">Sin vender</span>
+        </div>
+        <div class="pipeline-card">
+          <div class="pipeline-status">Parque Industrial</div>
+          <div class="pipeline-info">
+            <div class="pipeline-name">Technology Park Cubos</div>
+            <div class="pipeline-detail">Tierra disponible · Sin preventa</div>
+            <div class="pipeline-action">¿Qué falta para activar la venta?</div>
+          </div>
+          <span class="tag tag-gray">Sin vender</span>
+        </div>
+        <div class="pipeline-card">
+          <div class="pipeline-status">Residencial</div>
+          <div class="pipeline-info">
+            <div class="pipeline-name">Bernal</div>
+            <div class="pipeline-detail">Sin detalles cargados · Actualizar</div>
+            <div class="pipeline-action">Agregar detalles del proyecto</div>
+          </div>
+          <span class="tag tag-gray">Sin vender</span>
+        </div>
+        <div class="pipeline-card">
+          <div class="pipeline-status">Residencial</div>
+          <div class="pipeline-info">
+            <div class="pipeline-name">Nayarit</div>
+            <div class="pipeline-detail">Sin detalles cargados · Actualizar</div>
+            <div class="pipeline-action">Agregar detalles del proyecto</div>
+          </div>
+          <span class="tag tag-gray">Sin vender</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAFF PAGE -->
+    <div class="page" id="page-staff">
+      <div class="page-header">
+        <div class="page-title">Equipo</div>
+        <div class="page-sub">Quién hace qué — para que tú no lo hagas.</div>
+      </div>
+      <div class="staff-grid" id="staff-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CHECKIN MODAL -->
+<div class="overlay" id="checkin-overlay">
+  <div class="modal">
+    <div class="modal-top">
+      <div class="modal-title">Check-in <span>diario</span></div>
+      <button class="modal-close" onclick="closeCheckin()">✕</button>
+    </div>
+    <div id="checkin-content"></div>
+    <div class="modal-footer" id="checkin-footer">
+      <div class="modal-progress-bar"><div class="modal-progress-fill" id="progress-fill"></div></div>
+      <div class="modal-btns">
+        <button class="btn-skip" onclick="nextQ()">Saltar</button>
+        <button class="btn-next" onclick="nextQ()">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'director_dashboard_v1';
+
+const projects = [
+  {
+    id: 'encino',
+    name: 'El Encino Residencial',
+    location: 'Querétaro',
+    type: 'Residencial',
+    status: 'red',
+    stage: 'Operativo',
+    progress: 99,
+    lotes: 500,
+    alertTag: 'Conflictos colonos',
+    alertType: 'red',
+    myResponsibilities: [
+      'Definir plan de cobranza a morosos',
+      'Resolver trámites de concesión de agua',
+      'Estrategia para activar club y campo de golf',
+      'Mediar conflictos con colonos (no delegar esto)',
+    ],
+    delegated: [
+      'Supervisión de obras pendientes → Ismael',
+      'Servicio a cliente / quejas → Miriam',
+      'Representación legal → Mar',
+    ],
+    blockers: [
+      'Personas que deben y no han escriturado',
+      'Concesión de agua sin tramitar — no se cobra agua',
+      'Club de golf inoperante por fricción con colonos',
+    ],
+    contractors: 'Ismael (obra y mantenimiento in-house)',
+    permits: 'Concesión de agua PENDIENTE — crítico',
+    keyDates: 'Sin fecha definida para resolver agua y golf',
+  },
+  {
+    id: 'quercus',
+    name: 'Quercus',
+    location: 'Querétaro',
+    type: 'Residencial + Golf',
+    status: 'amber',
+    stage: 'Urbanización',
+    progress: 65,
+    lotes: 400,
+    alertTag: '35% urb. pendiente',
+    alertType: 'amber',
+    myResponsibilities: [
+      'Acelerar urbanización antes de que el problema escale',
+      'Gestionar escrituración pendiente de clientes',
+      'Evitar que se repita el patrón de El Encino',
+      'Definir calendario de entrega por zonas',
+    ],
+    delegated: [
+      'Ejecución de urbanización → Ismael + Omar',
+      'Seguimiento a clientes sin escriturar → Luis Jiménez',
+      'Trámites → Mar',
+    ],
+    blockers: [
+      'Solo 7 casas habitadas — baja presión de clientes por ahora',
+      'Urbanización al 65% con ventas al 99%',
+      'Riesgo de conflictos como El Encino si no se actúa',
+    ],
+    contractors: 'Ismael (supervisión), Omar (proyecto)',
+    permits: 'Revisar estado de permisos de urbanización',
+    keyDates: 'Definir fecha compromiso de entrega de urbanización',
+  },
+  {
+    id: 'mochis',
+    name: 'Gaviotas Los Mochis',
+    location: 'Los Mochis, Sinaloa',
+    type: 'Residencial + Golf',
+    status: 'green',
+    stage: 'Cierre / Cobranza',
+    progress: 85,
+    lotes: 165,
+    alertTag: 'Mayor oportunidad de cobranza',
+    alertType: 'green',
+    myResponsibilities: [
+      'PRIORIDAD: cerrar escrituración del campo de golf',
+      'Desbloquear venta de acciones de golf (depende de escritura)',
+      'Cobrar a clientes morosos del macrolote',
+      'Supervisar los 9 hoyos restantes a distancia',
+    ],
+    delegated: [
+      'Obra campo de golf → Alejandro',
+      'Seguimiento a clientes → Luis Jiménez',
+      'Trámites escrituración → Mar',
+    ],
+    blockers: [
+      'Escrituración del campo de golf BLOQUEADA — sin esto no hay acciones',
+      '~35 lotes pendientes de cobro',
+      'Distancia: todo es remoto',
+    ],
+    contractors: 'Alejandro (obra in-house)',
+    permits: 'Escrituración campo de golf — URGENTE',
+    keyDates: 'Terminar 9 hoyos restantes del campo de golf',
+  },
+  {
+    id: 'techpark',
+    name: 'Technology Park Arkansas',
+    location: 'Arkansas, EE.UU.',
+    type: 'Parque Industrial',
+    status: 'blue',
+    stage: 'Urbanización',
+    progress: 40,
+    lotes: null,
+    alertTag: 'Socio 43%',
+    alertType: 'blue',
+    myResponsibilities: [
+      'Control y supervisión de avance de obra',
+      'Asegurarse que la tierra recibida como pago esté bien protegida legalmente',
+      'Mantener comunicación con socios',
+    ],
+    delegated: [
+      'Supervisión diaria → socios locales',
+      'Contabilidad del proyecto → contaduría',
+    ],
+    blockers: [
+      'No recibimos dinero directo — pago fue en tierra',
+      'Control limitado al ser socios minoritarios (43%)',
+    ],
+    contractors: 'Socios mayoritarios en EE.UU.',
+    permits: 'Verificar estatus legal de tierra recibida como pago',
+    keyDates: 'Sin fecha crítica inmediata',
+  },
+  {
+    id: 'hermosillo',
+    name: 'Gaviotas Hermosillo',
+    location: 'Hermosillo, Sonora',
+    type: 'Residencial',
+    status: 'red',
+    stage: 'Crisis / Preventa',
+    progress: 15,
+    lotes: null,
+    alertTag: 'No se entregará en 2027',
+    alertType: 'red',
+    myResponsibilities: [
+      'URGENTE: comunicar la situación a los clientes ya vendidos',
+      'Definir qué ofrecer: esperar 5 años o devolución',
+      'Revisar marco legal del retraso por cambio de ley',
+      'Decidir si Felicitas puede coordinar comunicación con clientes',
+    ],
+    delegated: [
+      'Comunicación inicial → Felicitas / Miriam',
+      'Marco legal → Mar',
+    ],
+    blockers: [
+      'Cambio de leyes impide entrega en 2027',
+      'Entrega real: ~5 años adicionales',
+      'Clientes vendidos sin saber la situación — riesgo de demandas',
+    ],
+    contractors: 'Por definir',
+    permits: 'Revisar nuevo marco regulatorio que causó el retraso',
+    keyDates: 'Comunicar a clientes lo antes posible para evitar conflictos',
+  },
+  {
+    id: 'roble',
+    name: 'El Roble',
+    location: 'Querétaro',
+    type: 'Residencial',
+    status: 'amber',
+    stage: 'Legal / Desarrollo',
+    progress: 30,
+    lotes: 900,
+    alertTag: 'Carpeta en Fiscalía',
+    alertType: 'red',
+    myResponsibilities: [
+      'Liderar estrategia legal con abogados — no delegar',
+      'Mantener comunicación con clientes para evitar más demandas',
+      'Asegurarse que el plan de proyecto avanza en paralelo',
+      'Coordinar con JL en decisiones críticas de este proyecto',
+    ],
+    delegated: [
+      'Seguimiento jurídico → abogados externos + Mar',
+      'Coordinación con INFONAVIT → definir responsable',
+      'Proyecto y avance de obra → Omar + Eli',
+    ],
+    blockers: [
+      'Carpeta de investigación en la Fiscalía — requiere atención legal constante',
+      'Demandas activas de clientes',
+      '900 lotes vendidos sin entrega aún',
+    ],
+    contractors: 'Omar (proyecto), Eli (presupuestos)',
+    permits: 'Situación legal activa — carpeta Fiscalía',
+    keyDates: 'Alinearse con INFONAVIT para proyecto bienestar dentro del Roble',
+  },
+  {
+    id: 'infonavit',
+    name: 'INFONAVIT Bienestar',
+    location: 'Querétaro (dentro de El Roble)',
+    type: 'Venta de tierra',
+    status: 'blue',
+    stage: 'Negociación',
+    progress: 20,
+    lotes: null,
+    alertTag: 'Ayuda a El Roble',
+    alertType: 'blue',
+    myResponsibilities: [
+      'Cerrar la venta de tierra a INFONAVIT',
+      'Asegurarse que los trámites no se atasquen',
+      'Usar este proyecto para impulsar avance del Roble',
+    ],
+    delegated: [
+      'Gestión de trámites → Mar',
+      'Coordinación técnica → Omar / Eli',
+    ],
+    blockers: [
+      'Proyecto no es nuestro — somos facilitadores',
+      'Depende del avance legal de El Roble',
+    ],
+    contractors: 'INFONAVIT (cliente / institución)',
+    permits: 'Trámites de transferencia de tierra en proceso',
+    keyDates: 'Avanzar en paralelo con El Roble',
+  },
+];
+
+const decisions = [
+  { title: 'Comunicar retraso de 5 años a clientes de Hermosillo', sub: 'Si no actúas primero, vendrán demandas. Hay que salir adelante de esto.', proj: 'Gaviotas Hermosillo', type: 'urgent' },
+  { title: 'Cerrar escrituración del campo de golf en Mochis', sub: 'Sin escritura no puedes vender acciones. Es la mayor oportunidad de cobranza actual.', proj: 'Gaviotas Mochis', type: 'urgent' },
+  { title: 'Estrategia legal El Roble — reunión con abogados esta semana', sub: 'La carpeta en Fiscalía necesita atención activa, no solo seguimiento.', proj: 'El Roble', type: 'warn' },
+  { title: 'Definir plan de cobranza y agua en El Encino', sub: 'Dos problemas que llevan años sin resolverse. Necesitan un deadline real.', proj: 'El Encino', type: 'warn' },
+  { title: 'Decidir si activar Harbor o Technology Park Cubos', sub: 'Tienes tierra sin trabajar. ¿Cuál tiene más potencial ahora mismo?', proj: 'Pipeline', type: 'info' },
+];
+
+const staff = [
+  { initials: 'JL', name: 'JL — Tu papá', role: 'Director General / Decisor final', projects: ['Todos'], note: 'Persona clave — coordinación en decisiones críticas', alert: true },
+  { initials: 'MA', name: 'Mar', role: 'Representante legal / Trámites', projects: ['El Encino', 'Quercus', 'El Roble', 'Mochis', 'INFONAVIT'], note: 'Requiere instrucciones claras — no toma iniciativa sola' },
+  { initials: 'OJ', name: 'Omar J.', role: 'Arquitecto de proyectos', projects: ['Quercus', 'El Roble', 'INFONAVIT', 'Tech Park'] },
+  { initials: 'EL', name: 'Eli', role: 'Arquitecta / Presupuestos', projects: ['El Roble', 'INFONAVIT'] },
+  { initials: 'LJ', name: 'Luis Jiménez', role: 'Representante de clientes', projects: ['El Encino', 'Quercus', 'Mochis'], note: 'Muy bueno negociando — hay que estar encima de él', alert: true },
+  { initials: 'MI', name: 'Miriam', role: 'Servicio a cliente general', projects: ['El Encino', 'General'] },
+  { initials: 'FE', name: 'Felicitas', role: 'Servicio a cliente Hermosillo', projects: ['Hermosillo'], note: 'Potencial para más responsabilidades' },
+  { initials: 'IS', name: 'Ismael', role: 'Encargado de obra — Encino & Quercus', projects: ['El Encino', 'Quercus'] },
+  { initials: 'AL', name: 'Alejandro', role: 'Encargado de obra — Mochis', projects: ['Gaviotas Mochis'] },
+];
+
+const checkinQuestions = [
+  { q: '¿Cuál es el status actual?', sub: '¿Qué avanzó? ¿Qué se atascó? ¿Algo que no sabías?', placeholder: 'Ej. "La urbanización avanzó un 5% pero hay problema con el contratista de concreto..."' },
+  { q: '¿Cuál es TU responsabilidad específica esta semana?', sub: 'No lo que el equipo hace — lo que SOLO TÚ puedes o debes hacer.', placeholder: 'Ej. "Llamar al abogado, firmar el contrato, reunirme con el cliente X..."' },
+  { q: '¿Cómo podemos ganar más dinero aquí o acelerar?', sub: 'Piensa como dueño, no como administrador.', placeholder: 'Ej. "Si cerramos escrituración del campo, podemos vender 20 acciones de golf este mes..."' },
+];
+
+let state = { checkins: {}, notes: {}, doneDecisions: [] };
+let checkinIdx = 0;
+let checkinQIdx = 0;
+let checkinAnswers = {};
+let checkinCount = 0;
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const today = new Date().toDateString();
+      if (parsed.date !== today) {
+        state = { checkins: {}, notes: parsed.notes || {}, doneDecisions: [] };
+      } else {
+        state = parsed;
+      }
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    state.date = new Date().toDateString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+}
+
+function renderDecisions() {
+  const el = document.getElementById('decisions-list');
+  el.innerHTML = decisions.filter(d => !state.doneDecisions.includes(d.title)).map(d => `
+    <div class="decision-card ${d.type}">
+      <div class="decision-icon">${d.type === 'urgent' ? '🔴' : d.type === 'warn' ? '🟡' : '🔵'}</div>
+      <div class="decision-body">
+        <div class="decision-title">${d.title}</div>
+        <div class="decision-meta">${d.sub} <span class="decision-proj">${d.proj}</span></div>
+      </div>
+      <button class="done-btn" onclick="markDone('${d.title.replace(/'/g,"\\'")}')">✓ Hecho</button>
+    </div>
+  `).join('') || '<div style="font-size:0.82rem;color:var(--muted);padding:1rem 0;">✓ Todas las decisiones atendidas. Buen trabajo.</div>';
+}
+
+function markDone(title) {
+  state.doneDecisions.push(title);
+  saveState();
+  renderDecisions();
+  showToast('Marcado como atendido');
+}
+
+function renderProjectCard(p, container, mini) {
+  const statusColors = { red: 'red', amber: 'amber', green: 'green', blue: 'blue', gray: 'gray' };
+  const checked = state.checkins[p.id] ? '✓ ' : '';
+  const noteVal = state.notes[p.id] || '';
+  const card = document.createElement('div');
+  card.className = 'proj-card';
+  card.id = 'card-' + p.id;
+  card.innerHTML = `
+    <div class="proj-header" onclick="toggleProject('${p.id}')">
+      <div class="proj-color ${statusColors[p.status]}"></div>
+      <div class="proj-info">
+        <div class="proj-name">${checked}${p.name}</div>
+        <div class="proj-location mono">${p.location} · ${p.type}${p.lotes ? ' · ' + p.lotes + ' lotes' : ''}</div>
+      </div>
+      <div class="proj-tags">
+        <span class="tag tag-${p.alertType}">${p.alertTag}</span>
+        <span class="tag tag-gray">${p.stage}</span>
+      </div>
+      <div class="proj-meta">
+        <div class="proj-pct" style="color:var(--${statusColors[p.status]})">${p.progress}%</div>
+        <div class="proj-pct-label">avance</div>
+      </div>
+      <div class="proj-chevron" id="chev-${p.id}">▾</div>
+    </div>
+    <div class="proj-body" id="body-${p.id}">
+      <div class="proj-sections">
+        <div>
+          <div class="proj-section-title">▸ Tu responsabilidad</div>
+          <ul class="proj-list">
+            ${p.myResponsibilities.map(r => `<li class="mine">${r}</li>`).join('')}
+          </ul>
+        </div>
+        <div>
+          <div class="proj-section-title">Equipo / Delegado</div>
+          <ul class="proj-list">
+            ${p.delegated.map(r => `<li>${r}</li>`).join('')}
+          </ul>
+          <div class="proj-section-title" style="margin-top:12px">Bloqueos actuales</div>
+          <ul class="proj-list">
+            ${p.blockers.map(r => `<li class="blocker">${r}</li>`).join('')}
+          </ul>
+        </div>
+        <div>
+          <div class="proj-section-title">Contratistas</div>
+          <ul class="proj-list"><li>${p.contractors}</li></ul>
+          <div class="proj-section-title" style="margin-top:12px">Permisos / Legal</div>
+          <ul class="proj-list"><li>${p.permits}</li></ul>
+          <div class="proj-section-title" style="margin-top:12px">Fechas clave</div>
+          <ul class="proj-list"><li>${p.keyDates}</li></ul>
+        </div>
+      </div>
+      <div class="proj-notes">
+        <div class="proj-section-title">Notas del día</div>
+        <textarea id="note-${p.id}" placeholder="Agrega notas, acuerdos, recordatorios...">${noteVal}</textarea>
+        <button class="save-note-btn" onclick="saveNote('${p.id}')">Guardar nota</button>
+      </div>
+      <div class="proj-actions">
+        <button class="proj-action" onclick="markCheckin('${p.id}')">✓ Check-in hecho</button>
+        <button class="proj-action" onclick="copyStatus('${p.id}')">Copiar status para reporte</button>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+}
+
+function toggleProject(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.proj-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.proj-chevron').forEach(c => { c.classList.remove('open'); });
+  if (!isOpen) { body.classList.add('open'); chev.classList.add('open'); }
+}
+
+function saveNote(id) {
+  const val = document.getElementById('note-' + id).value;
+  state.notes[id] = val;
+  saveState();
+  showToast('Nota guardada');
+}
+
+function markCheckin(id) {
+  state.checkins[id] = true;
+  saveState();
+  checkinCount = Object.keys(state.checkins).length;
+  document.getElementById('checkin-count').textContent = checkinCount + '/7';
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    const nameEl = card.querySelector('.proj-name');
+    if (nameEl && !nameEl.textContent.startsWith('✓')) nameEl.textContent = '✓ ' + nameEl.textContent;
+  }
+  showToast('Check-in registrado ✓');
+}
+
+function copyStatus(id) {
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  const note = state.notes[id] || 'Sin notas';
+  const text = `📋 ${p.name}\nEstatus: ${p.stage} · ${p.progress}% avance\nBloqueos: ${p.blockers.join('; ')}\nNotas: ${note}`;
+  navigator.clipboard.writeText(text).then(() => showToast('Copiado al portapapeles'));
+}
+
+function renderStaff() {
+  const el = document.getElementById('staff-grid');
+  el.innerHTML = staff.map(s => `
+    <div class="staff-card">
+      <div class="staff-initial">${s.initials}</div>
+      <div class="staff-name">${s.name}</div>
+      <div class="staff-role">${s.role}</div>
+      ${s.note ? `<div class="staff-note">⚠ ${s.note}</div>` : ''}
+      <div class="staff-projects">${s.projects.map(p => `<span class="staff-proj-tag">${p}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+// CHECKIN FLOW
+function openCheckin() {
+  checkinIdx = 0;
+  checkinQIdx = 0;
+  checkinAnswers = {};
+  checkinCount = Object.keys(state.checkins).length;
+  document.getElementById('checkin-overlay').classList.add('open');
+  renderCheckinStep();
+}
+
+function closeCheckin() {
+  document.getElementById('checkin-overlay').classList.remove('open');
+}
+
+function renderCheckinStep() {
+  const total = projects.length * checkinQuestions.length;
+  const current = checkinIdx * checkinQuestions.length + checkinQIdx + 1;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const p = projects[checkinIdx];
+  const q = checkinQuestions[checkinQIdx];
+  document.getElementById('checkin-content').innerHTML = `
+    <div class="modal-project-label">${p.name} · ${p.location}</div>
+    <div class="modal-q">${q.q}</div>
+    <div class="modal-q-sub">${q.sub}</div>
+    <textarea class="modal-input" id="checkin-input" placeholder="${q.placeholder}"></textarea>
+    <div style="font-size:0.7rem;color:var(--muted2);margin-top:8px;">${current} de ${total} preguntas</div>
+  `;
+  setTimeout(() => { const el = document.getElementById('checkin-input'); if (el) el.focus(); }, 50);
+}
+
+function nextQ() {
+  const key = projects[checkinIdx].id + '_' + checkinQIdx;
+  const val = document.getElementById('checkin-input')?.value || '';
+  checkinAnswers[key] = val;
+
+  checkinQIdx++;
+  if (checkinQIdx >= checkinQuestions.length) {
+    markCheckin(projects[checkinIdx].id);
+    checkinQIdx = 0;
+    checkinIdx++;
+  }
+  if (checkinIdx >= projects.length) {
+    document.getElementById('checkin-footer').style.display = 'none';
+    document.getElementById('checkin-count').textContent = '7/7';
+    generateExecutiveSummary();
+    return;
+  }
+  renderCheckinStep();
+}
+
+async function generateExecutiveSummary() {
+  const modal = document.getElementById('checkin-content');
+  modal.innerHTML = `
+    <div class="checkin-done">
+      <div class="checkin-done-icon" style="animation: spin 2s linear infinite; display:inline-block;">◌</div>
+      <div class="checkin-done-title" style="margin-top:0.5rem;">Generando resumen ejecutivo...</div>
+      <div class="checkin-done-sub">Analizando tus respuestas de hoy.</div>
+    </div>
+    <style>@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }</style>
+  `;
+
+  const today = new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const dateStr = new Date().toISOString().slice(0,10);
+
+  let answersBlock = '';
+  projects.forEach((p, i) => {
+    const a0 = checkinAnswers[p.id + '_0'] || '(sin respuesta)';
+    const a1 = checkinAnswers[p.id + '_1'] || '(sin respuesta)';
+    const a2 = checkinAnswers[p.id + '_2'] || '(sin respuesta)';
+    answersBlock += `\n---\nPROYECTO: ${p.name} (${p.location}) — Etapa: ${p.stage}, Avance: ${p.progress}%\nBloqueos conocidos: ${p.blockers.join('; ')}\nRespuesta 1 - Status actual: ${a0}\nRespuesta 2 - Tu responsabilidad esta semana: ${a1}\nRespuesta 3 - Cómo ganar más dinero / acelerar: ${a2}`;
+  });
+
+  const prompt = `Eres el asistente ejecutivo de una Directora de una empresa desarrolladora inmobiliaria en México. La directora acaba de completar su check-in matutino de proyectos. Con base en sus respuestas, genera un RESUMEN EJECUTIVO en español, bilingüe (español/inglés) para presentarle a su padre y jefe (JL), quien es el Director General.
+
+Fecha: ${today}
+
+RESPUESTAS DEL CHECK-IN:
+${answersBlock}
+
+INSTRUCCIONES PARA EL RESUMEN:
+- Sé directo, ejecutivo, sin relleno.
+- El resumen debe tener 3 secciones claramente separadas con encabezados:
+  1. "🔴 URGENTE HOY / URGENT TODAY" — máximo 3 puntos, lo que NO puede esperar ni un día
+  2. "📋 OBJETIVOS DE LA SEMANA / WEEKLY GOALS" — por proyecto, qué se debe lograr esta semana (solo proyectos con acción relevante)
+  3. "💡 OPORTUNIDADES DE NEGOCIO / BUSINESS OPPORTUNITIES" — qué puede hacerse esta semana para acelerar ingresos o resolver algo que lleva tiempo atorado
+- Usa viñetas cortas (máximo 2 líneas cada una)
+- Al final agrega una línea: "Preparado por: [nombre de la directora] — ${dateStr}"
+- Tono: profesional pero directo, como lo escribiría una directora que sabe lo que hace`;
+
+  // Call our secure proxy server
+  try {
+    const response = await fetch('https://director-api.onrender.com/summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    const data = await response.json();
+    const summary = data.summary || 'No se pudo generar el resumen.';
+
+    state.lastSummary = { text: summary, date: dateStr };
+    saveState();
+
+    const formatted = summary
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^(🔴|📋|💡)(.+)$/gm, '<div style="font-size:0.85rem;font-weight:600;color:#c8a96e;margin:1rem 0 0.5rem;letter-spacing:0.03em;">$1$2</div>')
+      .replace(/^[-•] (.+)$/gm, '<div style="font-size:0.78rem;color:#d0ccc5;padding:3px 0 3px 12px;border-left:2px solid #333;margin:3px 0;">$1</div>')
+      .replace(/\n/g, '');
+
+    modal.innerHTML = `
+      <div style="max-height:55vh;overflow-y:auto;padding-right:4px;">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.2rem;color:#c8a96e;margin-bottom:0.25rem;">Resumen Ejecutivo</div>
+        <div style="font-size:0.68rem;color:#555;font-family:monospace;margin-bottom:1rem;">${today}</div>
+        <div id="summary-body">${formatted}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:1.25rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.07);">
+        <button class="btn-next" onclick="copySummary()" style="flex:1;font-size:0.78rem;">📋 Copiar para enviar a JL</button>
+        <button class="btn-skip" onclick="closeCheckin()" style="font-size:0.78rem;">Cerrar</button>
+      </div>
+    `;
+  } catch(err) {
+    modal.innerHTML = `
+      <div class="checkin-done">
+        <div class="checkin-done-icon">✦</div>
+        <div class="checkin-done-title">Check-in completado</div>
+        <div class="checkin-done-sub">No se pudo conectar al servidor.<br>Intenta de nuevo en un momento.</div>
+        <button class="btn-next" style="margin-top:1.5rem" onclick="closeCheckin()">Cerrar</button>
+      </div>
+    `;
+  }
+}
+
+function copySummary() {
+  const text = state.lastSummary?.text || '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Copiado — listo para enviar a JL'));
+}
+
+function copyPromptForClaude() {
+  const text = state.lastPrompt?.text || '';
+  if (!text) { showToast('No hay datos para copiar'); return; }
+  const wrapped = `Por favor genera mi resumen ejecutivo de hoy con base en estas respuestas de mi check-in:
+
+${text}`;
+  navigator.clipboard.writeText(wrapped).then(() => {
+    showToast('✓ Copiado — pégalo en Claude.ai');
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function setDate() {
+  const d = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const es = d.toLocaleDateString('es-MX', opts);
+  const en = d.toLocaleDateString('en-US', opts);
+  document.getElementById('today-badge').textContent = es + ' · ' + en;
+}
+
+function exportData() {
+  try {
+    const dataToExport = {
+      ...state,
+      exportedAt: new Date().toISOString(),
+      version: 1
+    };
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = 'director-dashboard-' + dateStr + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ Respaldo exportado correctamente');
+  } catch(e) {
+    showToast('Error al exportar — intenta de nuevo');
+  }
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed.notes && !parsed.checkins && !parsed.doneDecisions) {
+        showToast('Archivo inválido — no es un respaldo del dashboard');
+        return;
+      }
+      state.notes = parsed.notes || {};
+      state.doneDecisions = parsed.doneDecisions || [];
+      saveState();
+      showToast('✓ Respaldo importado — recarga la página para ver todo');
+      setTimeout(() => location.reload(), 1800);
+    } catch(err) {
+      showToast('Error al leer el archivo — verifica que sea el respaldo correcto');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// INIT
+loadState();
+setDate();
+checkinCount = Object.keys(state.checkins).length;
+document.getElementById('checkin-count').textContent = checkinCount + '/7';
+
+renderDecisions();
+renderStaff();
+
+const homeGrid = document.getElementById('home-projects');
+const allGrid = document.getElementById('all-projects');
+projects.forEach(p => {
+  renderProjectCard(p, homeGrid);
+  renderProjectCard(p, allGrid);
+});
+</script>
+</body>
+</html>
